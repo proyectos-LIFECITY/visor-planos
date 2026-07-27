@@ -1,0 +1,50 @@
+[
+  {
+    "number": "01-planta-de",
+    "name": "01-planta-de-semisotano-redes-de-gas-natural",
+    "file": "planos/01-planta-de-semisotano-redes-de-gas-natural.pdf",
+    "date": "2026-07-27T22:15:19.777869"
+  },
+  {
+    "number": "02-planta-de",
+    "name": "02-planta-de-primer-piso-redes-de-gas-natural",
+    "file": "planos/02-planta-de-primer-piso-redes-de-gas-natural.pdf",
+    "date": "2026-07-27T22:15:19.777869"
+  },
+  {
+    "number": "03-planta-de",
+    "name": "03-planta-de-segundo-piso-redes-de-gas-natural",
+    "file": "planos/03-planta-de-segundo-piso-redes-de-gas-natural.pdf",
+    "date": "2026-07-27T22:15:19.777869"
+  },
+  {
+    "number": "04-planta-de",
+    "name": "04-planta-de-octavo-piso-redes-de-gas-natural",
+    "file": "planos/04-planta-de-octavo-piso-redes-de-gas-natural.pdf",
+    "date": "2026-07-27T22:15:19.777869"
+  },
+  {
+    "number": "05-planta-de",
+    "name": "05-planta-de-terraza-redes-de-gas-natural-cuadros-de-cantidades",
+    "file": "planos/05-planta-de-terraza-redes-de-gas-natural-cuadros-de-cantidades.pdf",
+    "date": "2026-07-27T22:15:19.777869"
+  },
+  {
+    "number": "06-planta-de",
+    "name": "06-planta-de-cubierta-tecnica-redes-de-gas-natural-cuadros-de-cantidades",
+    "file": "planos/06-planta-de-cubierta-tecnica-redes-de-gas-natural-cuadros-de-cantidades.pdf",
+    "date": "2026-07-27T22:15:19.777869"
+  },
+  {
+    "number": "07-secciones",
+    "name": "07-secciones-y-detalle-de-centro-medicion-de-gas-natural",
+    "file": "planos/07-secciones-y-detalle-de-centro-medicion-de-gas-natural.pdf",
+    "date": "2026-07-27T22:15:19.777869"
+  },
+  {
+    "number": "08-isometria",
+    "name": "08-isometrias-de-redes-de-gas-natural",
+    "file": "planos/08-isometrias-de-redes-de-gas-natural.pdf",
+    "date": "2026-07-27T22:15:19.777869"
+  }
+]
