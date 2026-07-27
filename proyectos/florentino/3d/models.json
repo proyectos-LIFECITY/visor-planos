@@ -1,0 +1,11 @@
+[
+  {
+    "id": "florentino-arquitectura-demo",
+    "name": "FLORENTINO - ARQUITECTURA (demo)",
+    "file": "modelos/florentino-arquitectura-demo.ifc",
+    "date": "2026-07-27T20:51:36.396007",
+    "visible": true,
+    "meta": "modelos/florentino-arquitectura-demo.meta.json",
+    "schedules": "modelos/florentino-arquitectura-demo.schedules.json"
+  }
+]
