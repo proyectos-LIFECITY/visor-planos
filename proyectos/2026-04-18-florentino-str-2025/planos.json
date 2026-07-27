@@ -1,0 +1,86 @@
+[
+  {
+    "number": "00-listado-d",
+    "name": "00-listado-de-planos",
+    "file": "planos/00-listado-de-planos.pdf",
+    "date": "2026-07-27T23:53:29.322200"
+  },
+  {
+    "number": "100-plano-ci",
+    "name": "100-plano-cimentacion",
+    "file": "planos/100-plano-cimentacion.pdf",
+    "date": "2026-07-27T23:53:29.322200"
+  },
+  {
+    "number": "101-plano-ni",
+    "name": "101-plano-niv-1",
+    "file": "planos/101-plano-niv-1.pdf",
+    "date": "2026-07-27T23:53:29.322200"
+  },
+  {
+    "number": "102-plano-ni",
+    "name": "102-plano-niv-2",
+    "file": "planos/102-plano-niv-2.pdf",
+    "date": "2026-07-27T23:53:29.322200"
+  },
+  {
+    "number": "103-plano-ni",
+    "name": "103-plano-niv-3",
+    "file": "planos/103-plano-niv-3.pdf",
+    "date": "2026-07-27T23:53:29.322200"
+  },
+  {
+    "number": "104-plano-ni",
+    "name": "104-plano-niv-4",
+    "file": "planos/104-plano-niv-4.pdf",
+    "date": "2026-07-27T23:53:29.322200"
+  },
+  {
+    "number": "105-plano-ni",
+    "name": "105-plano-niv-5",
+    "file": "planos/105-plano-niv-5.pdf",
+    "date": "2026-07-27T23:53:29.322200"
+  },
+  {
+    "number": "106-plano-ni",
+    "name": "106-plano-niv-6",
+    "file": "planos/106-plano-niv-6.pdf",
+    "date": "2026-07-27T23:53:29.322200"
+  },
+  {
+    "number": "107-plano-ni",
+    "name": "107-plano-niv-7",
+    "file": "planos/107-plano-niv-7.pdf",
+    "date": "2026-07-27T23:53:29.322200"
+  },
+  {
+    "number": "108-plano-ni",
+    "name": "108-plano-niv-8",
+    "file": "planos/108-plano-niv-8.pdf",
+    "date": "2026-07-27T23:53:29.322200"
+  },
+  {
+    "number": "109-plano-ni",
+    "name": "109-plano-niv-9-terraza",
+    "file": "planos/109-plano-niv-9-terraza.pdf",
+    "date": "2026-07-27T23:53:29.322200"
+  },
+  {
+    "number": "110-plano-ni",
+    "name": "110-plano-niv-cubierta",
+    "file": "planos/110-plano-niv-cubierta.pdf",
+    "date": "2026-07-27T23:53:29.322200"
+  },
+  {
+    "number": "111-plano-es",
+    "name": "111-plano-escaleras",
+    "file": "planos/111-plano-escaleras.pdf",
+    "date": "2026-07-27T23:53:29.322200"
+  },
+  {
+    "number": "portada-proy",
+    "name": "portada-proyecto",
+    "file": "planos/portada-proyecto.pdf",
+    "date": "2026-07-27T23:53:29.322200"
+  }
+]
