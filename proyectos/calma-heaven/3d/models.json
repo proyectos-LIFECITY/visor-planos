@@ -1,0 +1,11 @@
+[
+  {
+    "id": "calma-heaven-hidrosanitario",
+    "name": "CALMA HEAVEN - HIDROSANITARIO",
+    "file": "modelos/calma-heaven-hidrosanitario.ifc",
+    "date": "2026-07-27T20:20:30.125363",
+    "visible": true,
+    "meta": "modelos/calma-heaven-hidrosanitario.meta.json",
+    "schedules": "modelos/calma-heaven-hidrosanitario.schedules.json"
+  }
+]

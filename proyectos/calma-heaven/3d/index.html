@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calma Heaven — Visor 3D</title>
+  <style>
+    :root { --bg:#0d1117; --panel:#161b22; --panel2:#1c2230; --border:#30363d; --text:#e6edf3; --muted:#8b949e; --accent:#2f81f7; --accent2:#3fb950; --warn:#d29922; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html, body { height:100%; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+    body { background:var(--bg); color:var(--text); overflow:hidden; }
+    #app { display:flex; flex-direction:column; height:100vh; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 16px; background:var(--panel); border-bottom:1px solid var(--border); z-index:10; }
+    .brand { display:flex; align-items:center; gap:10px; font-weight:600; }
+    .brand svg { color:var(--accent); }
+    .brand small { color:var(--muted); font-weight:400; }
+    .actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .btn { display:inline-flex; align-items:center; gap:6px; background:#21262d; color:var(--text); border:1px solid var(--border); border-radius:6px; padding:6px 10px; font-size:13px; cursor:pointer; text-decoration:none; }
+    .btn:hover { border-color:var(--accent); }
+    .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+    .btn.primary:hover { filter:brightness(1.1); }
+    #main { position:relative; flex:1; display:flex; min-height:0; }
+    #viewport { position:relative; flex:1; }
+    #viewport canvas { display:block; }
+    #overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; background:rgba(13,17,23,.85); z-index:5; transition:opacity .4s; }
+    #overlay.hidden { opacity:0; pointer-events:none; }
+    .spinner { width:42px; height:42px; border:4px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 1s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .progress { width:240px; height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
+    .progress > div { height:100%; width:0; background:var(--accent); transition:width .2s; }
+    #overlay-text { color:var(--muted); font-size:14px; }
+
+    /* Panel lateral izquierdo (dashboard) */
+    #side { width:320px; background:var(--panel); border-right:1px solid var(--border); display:flex; flex-direction:column; z-index:6; }
+    #side.collapsed { width:0; overflow:hidden; border:none; }
+    .side-scroll { overflow:auto; padding:12px; display:flex; flex-direction:column; gap:14px; }
+    .card { background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:10px 12px; }
+    .card h3 { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+    .row { display:flex; align-items:center; gap:8px; padding:3px 0; font-size:13px; }
+    .row input[type=checkbox] { accent-color:var(--accent); cursor:pointer; }
+    .row label { cursor:pointer; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .row .state { color:var(--muted); font-size:11px; }
+    select, .mini { width:100%; background:#0d1117; color:var(--text); border:1px solid var(--border); border-radius:6px; padding:6px 8px; font-size:13px; }
+    .chips { display:flex; flex-wrap:wrap; gap:6px; }
+    .chip { font-size:11px; padding:2px 8px; border-radius:999px; border:1px solid var(--border); cursor:pointer; color:var(--muted); }
+    .chip.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .catrow { display:flex; flex-direction:column; gap:2px; padding:5px 0; border-bottom:1px solid var(--border); }
+    .catrow:last-child { border-bottom:none; }
+    .catrow .top { display:flex; align-items:center; gap:8px; }
+    .catrow .name { flex:1; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .catrow .name:hover { color:var(--accent); }
+    .catrow .val { font-variant-numeric:tabular-nums; color:var(--text); font-size:12px; }
+    .catrow.sel .name { color:var(--accent); font-weight:600; }
+    .bar { height:5px; background:var(--border); border-radius:3px; overflow:hidden; margin-left:24px; }
+    .bar > div { height:100%; background:var(--accent); }
+    .tiny { font-size:11px; color:var(--muted); }
+    .totline { display:flex; justify-content:space-between; font-size:13px; margin-top:6px; padding-top:6px; border-top:1px dashed var(--border); }
+    .totline b { font-variant-numeric:tabular-nums; }
+
+    /* Panel derecho (drill-down) */
+    #drill { position:absolute; top:12px; right:12px; width:340px; max-height:calc(100% - 24px); overflow:auto; background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:12px; font-size:12px; display:none; z-index:7; }
+    #drill h3 { font-size:14px; margin-bottom:2px; }
+    #drill .sub { color:var(--muted); font-size:11px; margin-bottom:10px; }
+    #drill table { width:100%; border-collapse:collapse; margin-top:6px; }
+    #drill th, #drill td { padding:4px 6px; border-bottom:1px solid var(--border); text-align:left; }
+    #drill th { color:var(--muted); font-weight:500; font-size:11px; text-transform:uppercase; }
+    #drill td.num, #drill th.num { text-align:right; font-variant-numeric:tabular-nums; }
+    #drill tr.click { cursor:pointer; }
+    #drill tr.click:hover td { background:var(--panel2); }
+    #drill .close { float:right; cursor:pointer; color:var(--muted); }
+    #drill .back { cursor:pointer; color:var(--accent); font-size:12px; display:inline-block; margin-bottom:6px; }
+    .badge { display:inline-block; font-size:10px; padding:1px 6px; border-radius:999px; margin-left:6px; }
+    .badge.ok { background:rgba(63,185,80,.15); color:var(--accent2); border:1px solid var(--accent2); }
+    .badge.warn { background:rgba(210,153,34,.15); color:var(--warn); border:1px solid var(--warn); }
+    .sched-note { margin-top:8px; padding:8px; background:var(--panel2); border-radius:6px; font-size:11px; color:var(--muted); }
+    .sched-note b { color:var(--text); }
+
+    #props { position:absolute; bottom:12px; right:12px; width:300px; max-height:45%; overflow:auto; background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:12px; font-size:12px; display:none; z-index:7; }
+    #props h3 { font-size:13px; margin-bottom:8px; }
+    #props table { width:100%; border-collapse:collapse; }
+    #props td { padding:3px 4px; border-bottom:1px solid var(--border); vertical-align:top; }
+    #props td:first-child { color:var(--muted); white-space:nowrap; }
+    #props-close { float:right; cursor:pointer; color:var(--muted); }
+    footer { padding:6px 16px; background:var(--panel); border-top:1px solid var(--border); font-size:12px; color:var(--muted); display:flex; justify-content:space-between; }
+    .hint { font-size:11px; color:var(--muted); }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.152.2/build/three.module.js",
+      "three/examples/jsm/controls/OrbitControls": "https://unpkg.com/three@0.152.2/examples/jsm/controls/OrbitControls.js",
+      "three/examples/jsm/utils/BufferGeometryUtils": "https://unpkg.com/three@0.152.2/examples/jsm/utils/BufferGeometryUtils.js",
+      "three-mesh-bvh": "https://unpkg.com/three-mesh-bvh@0.5.21/build/index.module.js",
+      "web-ifc": "https://unpkg.com/web-ifc@0.0.39/web-ifc-api.js",
+      "web-ifc-three": "https://unpkg.com/web-ifc-three@0.0.126/IFCLoader.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="brand">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <span>Calma Heaven <small>· Visor 3D + Cantidades</small></span>
+      </div>
+      <div class="actions">
+        <button class="btn" id="btn-side">☰ Panel</button>
+        <button class="btn" id="btn-fit">Encuadrar</button>
+        <button class="btn" id="btn-reset">Ver todo</button>
+        <button class="btn" id="btn-wire">Alámbrico</button>
+        <button class="btn" id="btn-full">Pantalla</button>
+        <a class="btn primary" href="../index.html">◂ Volver a los planos</a>
+        <a class="btn" href="../../../index.html">Proyectos</a>
+      </div>
+    </header>
+    <div id="main">
+      <aside id="side">
+        <div class="side-scroll">
+          <div class="card" id="card-models">
+            <h3>Modelos</h3>
+            <div id="models-list"></div>
+          </div>
+          <div class="card" id="card-metric">
+            <h3>Métrica</h3>
+            <select id="field-select"></select>
+            <div class="tiny" id="field-hint" style="margin-top:6px;"></div>
+          </div>
+          <div class="card" id="card-levels">
+            <h3>Niveles <span class="tiny" id="lvl-toggle" style="cursor:pointer;color:var(--accent)">todos</span></h3>
+            <div id="levels-list" class="chips"></div>
+          </div>
+          <div class="card" id="card-cats">
+            <h3>Categorías <span class="tiny" id="cat-toggle" style="cursor:pointer;color:var(--accent)">todas</span></h3>
+            <div class="hint" style="margin-bottom:6px;">Marca para ver en 3D · clic en el nombre para desglosar</div>
+            <div id="cats-list"></div>
+            <div class="totline">TOTAL <b id="cats-total">—</b></div>
+          </div>
+        </div>
+      </aside>
+      <div id="viewport">
+        <div id="overlay">
+          <div class="spinner"></div>
+          <div class="progress"><div id="bar"></div></div>
+          <div id="overlay-text">Cargando visor…</div>
+        </div>
+        <div id="drill">
+          <span class="close" id="drill-close">✕</span>
+          <div id="drill-body"></div>
+        </div>
+        <div id="props">
+          <span id="props-close">✕</span>
+          <h3>Propiedades</h3>
+          <table id="props-table"></table>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <span>Clic en un elemento para propiedades · Arrastra para orbitar · Rueda para zoom</span>
+      <span id="stat">—</span>
+    </footer>
+  </div>
+  <script type="module">
+    import * as THREE from "three";
+    import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+    import { IFCLoader } from "web-ifc-three";
+    import * as WebIFC from "web-ifc";
+
+    const WASM_PATH = "https://unpkg.com/web-ifc@0.0.39/";
+    const $ = (id) => document.getElementById(id);
+    const viewport = $("viewport"), overlay = $("overlay"), overlayText = $("overlay-text");
+    const bar = $("bar"), stat = $("stat"), modelsList = $("models-list");
+
+    // ── Escena three.js ─────────────────────────────────────────
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0d1117);
+    const camera = new THREE.PerspectiveCamera(60, viewport.clientWidth / viewport.clientHeight, 0.1, 5000);
+    camera.position.set(20, 20, 20);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+    viewport.appendChild(renderer.domElement);
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const d1 = new THREE.DirectionalLight(0xffffff, 0.9); d1.position.set(10, 20, 10); scene.add(d1);
+    const d2 = new THREE.DirectionalLight(0xffffff, 0.4); d2.position.set(-10, 10, -10); scene.add(d2);
+    const grid = new THREE.GridHelper(100, 100, 0x1c2128, 0x1c2128); scene.add(grid);
+    (function animate(){ requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); })();
+    function onResize() {
+      camera.aspect = viewport.clientWidth / viewport.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+    }
+    window.addEventListener("resize", onResize);
+
+    const loader = new IFCLoader();
+    loader.ifcManager.setWasmPath(WASM_PATH);
+
+    // ── Estado ───────────────────────────────────────────────────
+    // entry = { cfg, mesh, tagMap:Map<string,expressID>, subset, indexed:bool }
+    const entries = [];
+    let allEls = [];                 // [{tag, cat, fam, typ, lvl, q, ei}]  ei = índice de entry
+    let schedulesByCat = new Map();  // cat -> [{name, fields:[{name,unit}]}]
+    let warnings = [];
+    let fields = ["Conteo"];         // métricas disponibles (unión de q)
+    let curField = "Conteo";
+    const catSel = new Set();        // categorías activas (visibles en 3D)
+    const lvlSel = new Set();        // niveles activos
+    let allCats = [], allLvls = [];
+    let filterTimer = null;
+
+    // Tipos IFC de producto que cubren la geometría exportada por Revit.
+    const PRODUCT_TYPES = [
+      "IFCWALL","IFCWALLSTANDARDCASE","IFCSLAB","IFCROOF","IFCBEAM","IFCCOLUMN","IFCDOOR","IFCWINDOW",
+      "IFCSTAIR","IFCSTAIRFLIGHT","IFCRAILING","IFCRAMP","IFCRAMPFLIGHT","IFCFOOTING","IFCPILE",
+      "IFCCOVERING","IFCCURTAINWALL","IFCPLATE","IFCMEMBER","IFCBUILDINGELEMENTPROXY","IFCBUILDINGELEMENTPART",
+      "IFCFURNISHINGELEMENT","IFCFURNITURE","IFCSYSTEMFURNITUREELEMENT",
+      "IFCFLOWTERMINAL","IFCFLOWSEGMENT","IFCFLOWFITTING","IFCFLOWCONTROLLER","IFCFLOWMOVINGDEVICE",
+      "IFCFLOWSTORAGEDEVICE","IFCFLOWTREATMENTDEVICE","IFCENERGYCONVERSIONDEVICE",
+      "IFCDISTRIBUTIONFLOWELEMENT","IFCDISTRIBUTIONCONTROLELEMENT","IFCCABLECARRIERSEGMENT","IFCCABLECARRIERFITTING",
+      "IFCLIGHTFIXTURE","IFCSANITARYTERMINAL","IFCSPACEHEATER","IFCAIRTERMINAL","IFCELECTRICAPPLIANCE",
+      "IFCREINFORCINGBAR","IFCREINFORCINGMESH","IFCSPACE"
+    ].map((n) => WebIFC[n]).filter((v) => typeof v === "number");
+
+    // ── Utilidades de formato ────────────────────────────────────
+    function fmt(n) {
+      if (n == null || isNaN(n)) return "—";
+      const dec = Number.isInteger(n) ? 0 : 2;
+      return n.toLocaleString("es", { minimumFractionDigits: dec, maximumFractionDigits: 2 });
+    }
+    function unitFor(field) {
+      for (const list of schedulesByCat.values())
+        for (const s of list)
+          for (const f of s.fields) if (f.name === field && f.unit) return f.unit;
+      return "";
+    }
+
+    // ── Carga de modelos + metadata ──────────────────────────────
+    function loadIfc(url, onProgress) {
+      return new Promise((resolve, reject) => loader.load(url, resolve, onProgress, reject));
+    }
+    async function fetchJson(url) {
+      try { const r = await fetch(url + (url.includes("?") ? "" : "?t=" + Date.now())); return r.ok ? await r.json() : null; }
+      catch { return null; }
+    }
+
+    function addModelRow(entry, idx) {
+      const row = document.createElement("div"); row.className = "row";
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = entry.cfg.visible !== false; cb.disabled = true;
+      const label = document.createElement("label"); label.textContent = entry.cfg.name || entry.cfg.id;
+      const state = document.createElement("span"); state.className = "state"; state.textContent = "cargando…";
+      cb.onchange = () => { entry.enabled = cb.checked; scheduleFilter(); };
+      row.append(cb, label, state); modelsList.appendChild(row);
+      entry.cb = cb; entry.state = state; entry.enabled = cb.checked;
+    }
+
+    async function indexModel(entry) {
+      // Construye Tag(ElementId) → expressID leyendo las entidades de producto una vez.
+      entry.tagMap = new Map();
+      const modelID = entry.mesh.modelID;
+      for (const t of PRODUCT_TYPES) {
+        let items;
+        try { items = await loader.ifcManager.getAllItemsOfType(modelID, t, true); }
+        catch { items = null; }
+        if (!items) continue;
+        for (const it of items) {
+          const tag = it && it.Tag && it.Tag.value != null ? String(it.Tag.value) : null;
+          if (tag != null && it.expressID != null) entry.tagMap.set(tag, it.expressID);
+        }
+      }
+      entry.indexed = true;
+    }
+
+    async function init() {
+      const cfgs = (await fetchJson("./models.json")) || [];
+      if (!cfgs.length) {
+        overlayText.textContent = "Este proyecto no tiene modelos 3D publicados.";
+        document.querySelector(".spinner").style.display = "none";
+        return;
+      }
+      cfgs.forEach((cfg, i) => { const e = { cfg, mesh: null, tagMap: new Map(), indexed: false, enabled: cfg.visible !== false }; entries.push(e); addModelRow(e, i); });
+
+      let first = true;
+      for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i];
+        overlayText.textContent = "Cargando " + (entry.cfg.name || entry.cfg.id) + "…";
+        try {
+          const mesh = await loadIfc(entry.cfg.file, (evt) => {
+            if (evt.lengthComputable) { const p = Math.round((evt.loaded / evt.total) * 100); bar.style.width = p + "%"; overlayText.textContent = "Descargando " + (entry.cfg.name || entry.cfg.id) + "… " + p + "%"; }
+          });
+          entry.mesh = mesh; mesh.visible = entry.enabled; scene.add(mesh);
+          entry.cb.disabled = false; entry.state.textContent = "";
+          if (first) { fitToVisible(); overlay.classList.add("hidden"); first = false; }
+
+          // Metadata + tablas
+          if (entry.cfg.meta) {
+            overlayText.textContent = "Leyendo cantidades de " + (entry.cfg.name || entry.cfg.id) + "…";
+            const meta = (await fetchJson("./" + entry.cfg.meta)) || [];
+            for (const m of meta) allEls.push({ ...m, tag: String(m.tag), ei: i });
+          }
+          if (entry.cfg.schedules) {
+            const sc = await fetchJson("./" + entry.cfg.schedules);
+            if (sc) {
+              for (const s of (sc.schedules || [])) {
+                if (!schedulesByCat.has(s.cat)) schedulesByCat.set(s.cat, []);
+                schedulesByCat.get(s.cat).push({ name: s.name, fields: s.fields || [] });
+              }
+              for (const w of (sc.warnings || [])) warnings.push((entry.cfg.name || "") + ": " + w);
+            }
+          }
+          // Índice Tag→expressID (para aislar en 3D). No bloquea el dashboard.
+          overlayText.textContent = "Indexando elementos de " + (entry.cfg.name || entry.cfg.id) + "…";
+          await indexModel(entry);
+          updateStat();
+        } catch (err) {
+          console.error("Error cargando " + entry.cfg.file, err);
+          entry.state.textContent = "error"; entry.cb.disabled = true;
+        }
+      }
+      overlay.classList.add("hidden");
+      buildDashboard();
+      if (visibleMeshes().length) fitToVisible();
+      updateStat();
+    }
+
+    // ── Dashboard ────────────────────────────────────────────────
+    function buildDashboard() {
+      // Métricas (unión de claves de q), Conteo primero
+      const fset = new Set(["Conteo"]);
+      for (const el of allEls) for (const k in (el.q || {})) fset.add(k);
+      fields = ["Conteo", ...[...fset].filter((f) => f !== "Conteo").sort((a, b) => a.localeCompare(b, "es"))];
+      const fsel = $("field-select");
+      fsel.innerHTML = fields.map((f) => `<option value="${esc(f)}">${esc(f)}${unitFor(f) ? " (" + esc(unitFor(f)) + ")" : ""}</option>`).join("");
+      fsel.value = curField = "Conteo";
+      fsel.onchange = () => { curField = fsel.value; renderCats(); };
+
+      // Niveles y categorías
+      allLvls = [...new Set(allEls.map((e) => e.lvl))].sort((a, b) => a.localeCompare(b, "es", { numeric: true }));
+      allCats = [...new Set(allEls.map((e) => e.cat))].sort((a, b) => a.localeCompare(b, "es"));
+      allLvls.forEach((l) => lvlSel.add(l));
+      allCats.forEach((c) => catSel.add(c));
+
+      renderLevels(); renderCats();
+      if (!allEls.length) {
+        $("card-metric").style.display = $("card-levels").style.display = $("card-cats").style.display = "none";
+        const note = document.createElement("div"); note.className = "hint";
+        note.textContent = "Este modelo se publicó sin datos de cantidades (solo 3D).";
+        $("card-models").appendChild(note);
+      }
+      $("field-hint").textContent = warnings.length ? "⚠ " + warnings.length + " aviso(s) de tablas — ver una categoría." : "";
+    }
+
+    function renderLevels() {
+      const box = $("levels-list"); box.innerHTML = "";
+      allLvls.forEach((l) => {
+        const chip = document.createElement("span"); chip.className = "chip" + (lvlSel.has(l) ? " on" : "");
+        chip.textContent = l; chip.title = l;
+        chip.onclick = () => { lvlSel.has(l) ? lvlSel.delete(l) : lvlSel.add(l); chip.classList.toggle("on"); renderCats(); scheduleFilter(); };
+        box.appendChild(chip);
+      });
+      $("lvl-toggle").onclick = () => {
+        const all = lvlSel.size === allLvls.length;
+        lvlSel.clear(); if (!all) allLvls.forEach((l) => lvlSel.add(l));
+        renderLevels(); renderCats(); scheduleFilter();
+      };
+    }
+
+    function filteredEls() { return allEls.filter((e) => lvlSel.has(e.lvl)); }
+    function valOf(el, field) { return field === "Conteo" ? 1 : (el.q && typeof el.q[field] === "number" ? el.q[field] : 0); }
+
+    function renderCats() {
+      const box = $("cats-list"); box.innerHTML = "";
+      const els = filteredEls();
+      const agg = new Map();
+      for (const el of els) agg.set(el.cat, (agg.get(el.cat) || 0) + valOf(el, curField));
+      const max = Math.max(1, ...agg.values());
+      let total = 0;
+      allCats.forEach((c) => {
+        const v = agg.get(c) || 0; total += v;
+        const rowEl = document.createElement("div"); rowEl.className = "catrow" + (catSel.has(c) ? " sel" : "");
+        const top = document.createElement("div"); top.className = "top";
+        const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = catSel.has(c);
+        cb.onchange = () => { cb.checked ? catSel.add(c) : catSel.delete(c); rowEl.classList.toggle("sel", cb.checked); scheduleFilter(); };
+        const name = document.createElement("span"); name.className = "name"; name.textContent = c; name.title = c;
+        name.onclick = () => openCatDrill(c);
+        const val = document.createElement("span"); val.className = "val"; val.textContent = fmt(v);
+        top.append(cb, name, val);
+        const barw = document.createElement("div"); barw.className = "bar"; const bi = document.createElement("div"); bi.style.width = (v / max * 100) + "%"; barw.appendChild(bi);
+        rowEl.append(top, barw); box.appendChild(rowEl);
+      });
+      $("cats-total").textContent = fmt(total) + (unitFor(curField) ? " " + unitFor(curField) : "");
+      $("cat-toggle").onclick = () => {
+        const all = catSel.size === allCats.length; catSel.clear();
+        if (!all) allCats.forEach((c) => catSel.add(c)); renderCats(); scheduleFilter();
+      };
+    }
+
+    // ── Drill-down (derecha) ─────────────────────────────────────
+    const drill = $("drill"), drillBody = $("drill-body");
+    $("drill-close").onclick = () => (drill.style.display = "none");
+
+    function openCatDrill(cat) {
+      const els = filteredEls().filter((e) => e.cat === cat);
+      const byType = new Map();
+      for (const el of els) { if (!byType.has(el.typ)) byType.set(el.typ, []); byType.get(el.typ).push(el); }
+      const rows = [...byType.entries()].map(([typ, arr]) => ({ typ, count: arr.length, val: arr.reduce((s, e) => s + valOf(e, curField), 0) }))
+        .sort((a, b) => b.val - a.val);
+      const total = rows.reduce((s, r) => s + r.val, 0);
+      const u = unitFor(curField);
+
+      let html = `<span class="close" id="drill-close2">✕</span>`;
+      html += `<h3>${esc(cat)}</h3><div class="sub">Métrica: <b>${esc(curField)}</b>${u ? " (" + esc(u) + ")" : ""} · ${els.length} elemento(s)</div>`;
+      html += scheduleNote(cat);
+      html += `<table><thead><tr><th>Tipo</th><th class="num">Conteo</th><th class="num">${esc(curField)}</th></tr></thead><tbody>`;
+      for (const r of rows) html += `<tr class="click" data-typ="${esc(r.typ)}"><td>${esc(r.typ)}</td><td class="num">${fmt(r.count)}</td><td class="num">${fmt(r.val)}</td></tr>`;
+      html += `</tbody><tfoot><tr><th>Total</th><th class="num">${fmt(els.length)}</th><th class="num">${fmt(total)}</th></tr></tfoot></table>`;
+      html += `<div class="hint" style="margin-top:6px;">Clic en un tipo para desglosar por nivel.</div>`;
+      drillBody.innerHTML = html; drill.style.display = "block";
+      $("drill-close2").onclick = () => (drill.style.display = "none");
+      drillBody.querySelectorAll("tr.click").forEach((tr) => tr.onclick = () => openTypeDrill(cat, tr.dataset.typ));
+    }
+
+    function openTypeDrill(cat, typ) {
+      const els = filteredEls().filter((e) => e.cat === cat && e.typ === typ);
+      const byLvl = new Map();
+      for (const el of els) { if (!byLvl.has(el.lvl)) byLvl.set(el.lvl, []); byLvl.get(el.lvl).push(el); }
+      const rows = [...byLvl.entries()].map(([lvl, arr]) => ({ lvl, count: arr.length, val: arr.reduce((s, e) => s + valOf(e, curField), 0) }))
+        .sort((a, b) => a.lvl.localeCompare(b.lvl, "es", { numeric: true }));
+      const total = rows.reduce((s, r) => s + r.val, 0);
+      const u = unitFor(curField);
+
+      let html = `<span class="close" id="drill-close2">✕</span>`;
+      html += `<span class="back" id="drill-back">◂ ${esc(cat)}</span>`;
+      html += `<h3>${esc(typ)}</h3><div class="sub">${esc(cat)} · Métrica: <b>${esc(curField)}</b>${u ? " (" + esc(u) + ")" : ""}</div>`;
+      html += `<table><thead><tr><th>Nivel</th><th class="num">Conteo</th><th class="num">${esc(curField)}</th></tr></thead><tbody>`;
+      for (const r of rows) html += `<tr><td>${esc(r.lvl)}</td><td class="num">${fmt(r.count)}</td><td class="num">${fmt(r.val)}</td></tr>`;
+      html += `</tbody><tfoot><tr><th>Total</th><th class="num">${fmt(els.length)}</th><th class="num">${fmt(total)}</th></tr></tfoot></table>`;
+      drillBody.innerHTML = html; drill.style.display = "block";
+      $("drill-close2").onclick = () => (drill.style.display = "none");
+      $("drill-back").onclick = () => openCatDrill(cat);
+    }
+
+    function scheduleNote(cat) {
+      const list = schedulesByCat.get(cat);
+      if (!list || !list.length) return `<div class="sched-note">Sin Tabla de Cantidades en Revit para esta categoría. Se muestran conteo y cantidades genéricas (área/volumen si aplica).</div>`;
+      const totaled = new Set();
+      list.forEach((s) => s.fields.forEach((f) => totaled.add(f.name + (f.unit ? " (" + f.unit + ")" : ""))));
+      const match = list.some((s) => s.fields.some((f) => f.name === curField));
+      const badge = match ? `<span class="badge ok">campo totalizado ✓</span>` : `<span class="badge warn">elige un campo totalizado</span>`;
+      let html = `<div class="sched-note"><b>${list.length} tabla(s) de cantidades</b> ${badge}<br>`;
+      html += list.map((s) => "• " + esc(s.name) + ": " + (s.fields.map((f) => esc(f.name)).join(", ") || "—")).join("<br>");
+      if (list.length > 1) html += `<br><span style="color:var(--warn)">⚠ Hay varias tablas para esta categoría; el total suma todos los elementos de la categoría.</span>`;
+      html += `<br>Campos totalizados: ${[...totaled].map(esc).join(" · ") || "—"}</div>`;
+      return html;
+    }
+
+    function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+    // ── Filtro 3D ────────────────────────────────────────────────
+    function scheduleFilter() { clearTimeout(filterTimer); filterTimer = setTimeout(applyFilter, 120); }
+
+    function isElVisible(m) { return catSel.has(m.cat) && lvlSel.has(m.lvl); }
+
+    function applyFilter() {
+      const allCatsOn = catSel.size === allCats.length;
+      const allLvlsOn = lvlSel.size === allLvls.length;
+      const noFilter = allCatsOn && allLvlsOn;
+
+      for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i]; if (!entry.mesh) continue;
+        const on = entry.enabled;
+        // Sin datos o sin filtro: mostrar/ocultar el modelo completo y quitar subset.
+        if (noFilter || !entry.indexed || !allEls.length) {
+          removeSubset(entry);
+          entry.mesh.visible = on;
+          continue;
+        }
+        if (!on) { removeSubset(entry); entry.mesh.visible = false; continue; }
+        // Con filtro: subset con los expressID visibles.
+        const ids = [];
+        for (const el of allEls) {
+          if (el.ei !== i || !isElVisible(el)) continue;
+          const ex = entry.tagMap.get(el.tag);
+          if (ex != null) ids.push(ex);
+        }
+        entry.mesh.visible = false;
+        if (ids.length) {
+          try {
+            entry.subset = loader.ifcManager.createSubset({
+              modelID: entry.mesh.modelID, ids, scene, removePrevious: true,
+              customID: "flt-" + entry.mesh.modelID,
+            });
+          } catch (e) { console.warn(e); entry.mesh.visible = on; }
+        } else {
+          removeSubset(entry);
+        }
+      }
+      updateStat();
+    }
+
+    function removeSubset(entry) {
+      if (!entry.subset) return;
+      try { loader.ifcManager.removeSubset(entry.mesh.modelID, undefined, "flt-" + entry.mesh.modelID); } catch {}
+      if (entry.subset.parent) entry.subset.parent.remove(entry.subset);
+      entry.subset = null;
+    }
+
+    function currentMeshes() {
+      const ms = [];
+      for (const e of entries) {
+        if (!e.mesh) continue;
+        if (e.subset) ms.push(e.subset);
+        else if (e.mesh.visible) ms.push(e.mesh);
+      }
+      return ms;
+    }
+    function visibleMeshes() { return entries.filter((e) => e.mesh && e.mesh.visible).map((e) => e.mesh); }
+
+    function updateStat() {
+      const ms = currentMeshes(); let tris = 0;
+      for (const m of ms) if (m.geometry && m.geometry.index) tris += m.geometry.index.count / 3;
+      const modelsOn = entries.filter((e) => e.mesh && (e.mesh.visible || e.subset)).length;
+      stat.textContent = modelsOn + "/" + entries.length + " modelos · " + Math.round(tris).toLocaleString("es") + " triángulos" + (allEls.length ? " · " + allEls.length.toLocaleString("es") + " elementos" : "");
+    }
+
+    function fitToVisible() {
+      const ms = currentMeshes(); if (!ms.length) return;
+      const box = new THREE.Box3(); ms.forEach((m) => box.expandByObject(m));
+      if (box.isEmpty()) return;
+      const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z) || 10;
+      controls.target.copy(center);
+      const dist = maxDim * 1.6;
+      camera.position.set(center.x + dist, center.y + dist * 0.8, center.z + dist);
+      camera.near = maxDim / 100; camera.far = maxDim * 100; camera.updateProjectionMatrix();
+      grid.position.y = box.min.y; grid.scale.setScalar(Math.ceil(maxDim / 10) * 20 / 100);
+      controls.update();
+    }
+
+    init();
+
+    // ── Selección de elementos ───────────────────────────────────
+    const raycaster = new THREE.Raycaster(); raycaster.firstHitOnly = true;
+    const mouse = new THREE.Vector2();
+    const propsPanel = $("props"), propsTable = $("props-table");
+    $("props-close").onclick = () => (propsPanel.style.display = "none");
+    let downPos = null;
+    renderer.domElement.addEventListener("pointerdown", (e) => (downPos = { x: e.clientX, y: e.clientY }));
+    renderer.domElement.addEventListener("pointerup", async (e) => {
+      if (!downPos) return;
+      if (Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y) > 5) return;
+      const meshes = currentMeshes(); if (!meshes.length) return;
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const hits = raycaster.intersectObjects(meshes, true);
+      if (!hits.length) return;
+      try {
+        let obj = hits[0].object; while (obj && obj.modelID === undefined) obj = obj.parent;
+        if (!obj) return;
+        const id = loader.ifcManager.getExpressId(hits[0].object.geometry, hits[0].faceIndex);
+        const props = await loader.ifcManager.getItemProperties(obj.modelID, id, true);
+        showProps(props);
+      } catch (err) { console.warn(err); }
+    });
+    function pv(v) { if (v == null) return "—"; if (typeof v === "object") return v.value != null ? v.value : JSON.stringify(v); return v; }
+    function showProps(props) {
+      const tag = props.Tag ? String(pv(props.Tag)) : null;
+      const meta = tag ? allEls.find((e) => e.tag === tag) : null;
+      const rows = [["Nombre", pv(props.Name)], ["GlobalId", pv(props.GlobalId)], ["Tag (ElementId)", pv(props.Tag)]];
+      if (meta) {
+        rows.push(["Categoría", meta.cat], ["Familia", meta.fam], ["Tipo", meta.typ], ["Nivel", meta.lvl]);
+        for (const k in (meta.q || {})) rows.push([k, fmt(meta.q[k])]);
+      } else {
+        rows.push(["ObjectType", pv(props.ObjectType)]);
+      }
+      propsTable.innerHTML = rows.map((r) => `<tr><td>${esc(r[0])}</td><td>${esc(pv(r[1]))}</td></tr>`).join("");
+      propsPanel.style.display = "block";
+    }
+
+    // ── Botones ──────────────────────────────────────────────────
+    $("btn-fit").onclick = fitToVisible;
+    $("btn-side").onclick = () => { $("side").classList.toggle("collapsed"); setTimeout(onResize, 10); };
+    $("btn-reset").onclick = () => {
+      catSel.clear(); allCats.forEach((c) => catSel.add(c));
+      lvlSel.clear(); allLvls.forEach((l) => lvlSel.add(l));
+      entries.forEach((e) => { if (e.cb) { e.cb.checked = true; e.enabled = true; } });
+      renderLevels(); renderCats(); applyFilter(); fitToVisible();
+    };
+    let wire = false;
+    $("btn-wire").onclick = () => {
+      wire = !wire;
+      currentMeshes().forEach((m) => m.traverse((o) => { if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach((mm) => (mm.wireframe = wire)); }));
+    };
+    $("btn-full").onclick = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); };
+  </script>
+</body>
+</html>

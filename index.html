@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Proyectos — Planos + 3D</title>
+  <style>
+    :root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --text:#e6edf3; --muted:#8b949e; --accent:#2f81f7; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",sans-serif; min-height:100vh; }
+    header { padding:28px 24px; border-bottom:1px solid var(--border); background:var(--panel); }
+    .brand { display:flex; align-items:center; gap:12px; max-width:1100px; margin:0 auto; }
+    .brand svg { color:var(--accent); }
+    .brand h1 { font-size:20px; }
+    .brand p { color:var(--muted); font-size:13px; margin-top:2px; }
+    main { max-width:1100px; margin:0 auto; padding:24px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; }
+    .card { display:block; text-decoration:none; color:inherit; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:18px; transition:.15s; }
+    .card:hover { border-color:var(--accent); transform:translateY(-2px); }
+    .card .ico { width:40px; height:40px; border-radius:8px; background:#21262d; display:flex; align-items:center; justify-content:center; color:var(--accent); margin-bottom:12px; }
+    .card h3 { font-size:15px; margin-bottom:4px; }
+    .card .meta { color:var(--muted); font-size:12px; }
+    .empty { color:var(--muted); text-align:center; padding:60px 20px; }
+    footer { text-align:center; color:var(--muted); font-size:12px; padding:24px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <div>
+        <h1>Proyectos — Planos + 3D</h1>
+        <p>Proyectos publicados desde Revit — clic para abrir los planos y el modelo 3D</p>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty" style="display:none">Aún no hay proyectos publicados.</div>
+  </main>
+  <footer>Publicado con Visor Planos + 3D para Revit</footer>
+  <script>
+    const ICON = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>';
+    fetch("./proyectos/index.json?t=" + Date.now())
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list) => {
+        const grid = document.getElementById("grid");
+        if (!list || !list.length) { document.getElementById("empty").style.display = "block"; return; }
+        list.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+        grid.innerHTML = list.map((p) => {
+          const date = p.date ? new Date(p.date).toLocaleDateString("es-ES") : "";
+          const parts = [];
+          if (p.models != null) parts.push(p.models + (p.models === 1 ? " modelo" : " modelos"));
+          if (p.planos != null) parts.push(p.planos + (p.planos === 1 ? " plano" : " planos"));
+          if (!parts.length && p.file) parts.push(p.file);
+          if (date) parts.push(date);
+          return '<a class="card" href="./proyectos/' + p.slug + '/index.html">' +
+            '<div class="ico">' + ICON + '</div>' +
+            '<h3>' + (p.name || p.slug) + '</h3>' +
+            '<div class="meta">' + parts.join(" · ") + '</div>' +
+          '</a>';
+        }).join("");
+      })
+      .catch(() => { document.getElementById("empty").style.display = "block"; });
+  </script>
+</body>
+</html>

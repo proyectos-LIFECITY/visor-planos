@@ -1,0 +1,104 @@
+[
+  {
+    "number": "hs-101-sanit",
+    "name": "hs-101-sanitario-nivel-sotano",
+    "file": "planos/hs-101-sanitario-nivel-sotano.pdf",
+    "date": "2026-07-27T20:20:30.125363"
+  },
+  {
+    "number": "hs-106-sanit",
+    "name": "hs-106-sanitario-cubierta",
+    "file": "planos/hs-106-sanitario-cubierta.pdf",
+    "date": "2026-07-27T20:20:30.125363"
+  },
+  {
+    "number": "hs-107-hidra",
+    "name": "hs-107-hidraulico-nivel-1",
+    "file": "planos/hs-107-hidraulico-nivel-1.pdf",
+    "date": "2026-07-27T20:20:30.125363"
+  },
+  {
+    "number": "hs-108-hidra",
+    "name": "hs-108-hidraulico-nivel-2",
+    "file": "planos/hs-108-hidraulico-nivel-2.pdf",
+    "date": "2026-07-27T20:20:30.125363"
+  },
+  {
+    "number": "hs-109-hidra",
+    "name": "hs-109-hidraulico-nivel-3",
+    "file": "planos/hs-109-hidraulico-nivel-3.pdf",
+    "date": "2026-07-27T20:20:30.125363"
+  },
+  {
+    "number": "hs-110-hidra",
+    "name": "hs-110-hidraulico-nivel-4",
+    "file": "planos/hs-110-hidraulico-nivel-4.pdf",
+    "date": "2026-07-27T20:20:30.125363"
+  },
+  {
+    "number": "hs-111-hidra",
+    "name": "hs-111-hidraulico-nivel-sotano",
+    "file": "planos/hs-111-hidraulico-nivel-sotano.pdf",
+    "date": "2026-07-27T20:20:30.125363"
+  },
+  {
+    "number": "hs-112-hidra",
+    "name": "hs-112-hidraulico-cubierta",
+    "file": "planos/hs-112-hidraulico-cubierta.pdf",
+    "date": "2026-07-27T20:20:30.125363"
+  },
+  {
+    "number": "hs-113-hidra",
+    "name": "hs-113-hidraulico-terraza",
+    "file": "planos/hs-113-hidraulico-terraza.pdf",
+    "date": "2026-07-27T20:20:30.125363"
+  },
+  {
+    "number": "s-101-sanita",
+    "name": "s-101-sanitario-1",
+    "file": "planos/s-101-sanitario-1.pdf",
+    "date": "2026-07-27T20:20:30.125363"
+  },
+  {
+    "number": "s-102-sanita",
+    "name": "s-102-sanitario-2",
+    "file": "planos/s-102-sanitario-2.pdf",
+    "date": "2026-07-27T20:20:30.125363"
+  },
+  {
+    "number": "s-103-sanita",
+    "name": "s-103-sanitario-3",
+    "file": "planos/s-103-sanitario-3.pdf",
+    "date": "2026-07-27T20:20:30.125363"
+  },
+  {
+    "number": "s-104-sanita",
+    "name": "s-104-sanitario-4",
+    "file": "planos/s-104-sanitario-4.pdf",
+    "date": "2026-07-27T20:20:30.125363"
+  },
+  {
+    "number": "s-105-sanita",
+    "name": "s-105-sanitario-cubierta",
+    "file": "planos/s-105-sanitario-cubierta.pdf",
+    "date": "2026-07-27T20:20:30.125363"
+  },
+  {
+    "number": "s-106-sanita",
+    "name": "s-106-sanitario-sotano",
+    "file": "planos/s-106-sanitario-sotano.pdf",
+    "date": "2026-07-27T20:20:30.125363"
+  },
+  {
+    "number": "s-107-sanita",
+    "name": "s-107-sanitario-cortes",
+    "file": "planos/s-107-sanitario-cortes.pdf",
+    "date": "2026-07-27T20:20:30.125363"
+  },
+  {
+    "number": "s-108-sanita",
+    "name": "s-108-sanitario-terraza",
+    "file": "planos/s-108-sanitario-terraza.pdf",
+    "date": "2026-07-27T20:20:30.125363"
+  }
+]
