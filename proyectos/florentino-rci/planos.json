@@ -1,0 +1,38 @@
+[
+  {
+    "number": "pl01-planta-",
+    "name": "pl01-planta-sotano",
+    "file": "planos/pl01-planta-sotano.pdf",
+    "date": "2026-07-27T22:12:20.408706"
+  },
+  {
+    "number": "pl02-planta-",
+    "name": "pl02-planta-piso-1",
+    "file": "planos/pl02-planta-piso-1.pdf",
+    "date": "2026-07-27T22:12:20.408706"
+  },
+  {
+    "number": "pl03-planta-",
+    "name": "pl03-planta-piso-2-y-piso-tipo",
+    "file": "planos/pl03-planta-piso-2-y-piso-tipo.pdf",
+    "date": "2026-07-27T22:12:20.408706"
+  },
+  {
+    "number": "pl04-cuarto-",
+    "name": "pl04-cuarto-de-bombas-rci",
+    "file": "planos/pl04-cuarto-de-bombas-rci.pdf",
+    "date": "2026-07-27T22:12:20.408706"
+  },
+  {
+    "number": "pl05-planta-",
+    "name": "pl05-planta-piso-9-y-cubierta",
+    "file": "planos/pl05-planta-piso-9-y-cubierta.pdf",
+    "date": "2026-07-27T22:12:20.408706"
+  },
+  {
+    "number": "pl06-isometr",
+    "name": "pl06-isometria-general",
+    "file": "planos/pl06-isometria-general.pdf",
+    "date": "2026-07-27T22:12:20.408706"
+  }
+]

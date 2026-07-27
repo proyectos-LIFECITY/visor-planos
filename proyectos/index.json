@@ -12,5 +12,12 @@
     "date": "2026-07-27T21:10:30.639282",
     "models": 1,
     "planos": 17
+  },
+  {
+    "slug": "florentino-rci",
+    "name": "FLORENTINO-RCI",
+    "date": "2026-07-27T22:12:20.408706",
+    "models": 1,
+    "planos": 6
   }
 ]

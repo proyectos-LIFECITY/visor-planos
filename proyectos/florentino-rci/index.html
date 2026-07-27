@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FLORENTINO-RCI — Planos</title>
+  <style>
+    :root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --text:#e6edf3; --muted:#8b949e; --accent:#2f81f7; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html, body { height:100%; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+    body { background:var(--bg); color:var(--text); overflow:hidden; }
+    #app { display:flex; flex-direction:column; height:100vh; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 16px; background:var(--panel); border-bottom:1px solid var(--border); z-index:10; }
+    .brand { display:flex; align-items:center; gap:10px; font-weight:600; }
+    .brand svg { color:var(--accent); }
+    .brand small { color:var(--muted); font-weight:400; }
+    .actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .btn { display:inline-flex; align-items:center; gap:6px; background:#21262d; color:var(--text); border:1px solid var(--border); border-radius:6px; padding:6px 10px; font-size:13px; cursor:pointer; text-decoration:none; }
+    .btn:hover { border-color:var(--accent); }
+    .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+    .btn.primary:hover { filter:brightness(1.1); }
+    #layout { display:flex; flex:1; min-height:0; }
+    #sidebar { width:280px; min-width:220px; background:var(--panel); border-right:1px solid var(--border); overflow:auto; padding:10px; }
+    #sidebar h3 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); padding:6px 8px; }
+    .sheet { display:block; width:100%; text-align:left; background:none; border:1px solid transparent; border-radius:6px; padding:8px 10px; color:var(--text); cursor:pointer; font-size:13px; }
+    .sheet:hover { background:#21262d; }
+    .sheet.active { background:#21262d; border-color:var(--accent); }
+    .sheet .num { color:var(--accent); font-weight:600; margin-right:6px; }
+    .sheet .date { display:block; color:var(--muted); font-size:11px; margin-top:2px; }
+    #viewer { flex:1; position:relative; background:#010409; }
+    #viewer iframe { width:100%; height:100%; border:0; }
+    #empty { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; color:var(--muted); text-align:center; padding:24px; }
+    footer { padding:6px 16px; background:var(--panel); border-top:1px solid var(--border); font-size:12px; color:var(--muted); display:flex; justify-content:space-between; }
+    @media (max-width:700px){ #sidebar { width:170px; min-width:150px; } }
+  #sidebar{transition:width .18s ease;}#sidebar.collapsed{width:0;min-width:0;padding:0;border:none;overflow:hidden;}</style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="brand">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>FLORENTINO-RCI <small>· Planos</small></span>
+      </div>
+      <div class="actions">
+        <button class="btn" id="btn-side" title="Ocultar/mostrar el panel de planos">&#9776; Planos</button>
+        <a class="btn" id="btn-open" href="#" target="_blank" style="display:none">Abrir PDF</a>
+        <a class="btn primary" href="./3d/index.html">Ver modelo 3D ▸</a>
+        <a class="btn" href="../../index.html">Proyectos</a>
+      </div>
+    </header>
+    <div id="layout">
+      <nav id="sidebar">
+        <h3>Planos</h3>
+        <div id="list"></div>
+      </nav>
+      <div id="viewer">
+        <div id="empty">
+          <div>Este proyecto no tiene planos publicados.</div>
+          <a class="btn primary" href="./3d/index.html">Ver modelo 3D ▸</a>
+        </div>
+        <iframe id="frame" style="display:none" title="Plano"></iframe>
+      </div>
+    </div>
+    <footer>
+      <span>Selecciona un plano en la lista para verlo</span>
+      <span id="stat">—</span>
+    </footer>
+  </div>
+  <script>
+    const list = document.getElementById("list");
+    const frame = document.getElementById("frame");
+    const empty = document.getElementById("empty");
+    const stat = document.getElementById("stat");
+    const btnOpen = document.getElementById("btn-open");
+    let active = null;
+
+    function show(p, el) {
+      if (active) active.classList.remove("active");
+      active = el; el.classList.add("active");
+      frame.style.display = "block"; empty.style.display = "none";
+      frame.src = p.file + "#view=FitH";
+      btnOpen.href = p.file; btnOpen.style.display = "inline-flex";
+    }
+
+    fetch("./planos.json?t=" + Date.now())
+      .then((r) => (r.ok ? r.json() : []))
+      .then((planos) => {
+        if (!planos || !planos.length) { stat.textContent = "0 planos"; return; }
+        stat.textContent = planos.length + (planos.length === 1 ? " plano" : " planos");
+        planos.forEach((p, i) => {
+          const b = document.createElement("button");
+          b.className = "sheet";
+          const date = p.date ? new Date(p.date).toLocaleDateString("es-ES") : "";
+          b.innerHTML = '<span class="num">' + (p.number || "") + '</span>' + (p.name || p.file) +
+            (date ? '<span class="date">' + date + '</span>' : "");
+          b.onclick = () => show(p, b);
+          list.appendChild(b);
+          if (i === 0) show(p, b);
+        });
+      })
+      .catch(() => { stat.textContent = "No se pudo cargar la lista de planos"; });
+  document.getElementById("btn-side").onclick=function(){document.getElementById("sidebar").classList.toggle("collapsed");};</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+[
+  {
+    "id": "florentino-rci-rvt2025",
+    "name": "FLORENTINO-RCI-RVT2025",
+    "file": "modelos/florentino-rci-rvt2025.ifc",
+    "date": "2026-07-27T22:12:20.408706",
+    "visible": true,
+    "meta": "modelos/florentino-rci-rvt2025.meta.json",
+    "schedules": "modelos/florentino-rci-rvt2025.schedules.json"
+  }
+]
