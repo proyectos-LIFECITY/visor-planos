@@ -40,5 +40,12 @@
     "date": "2026-07-27T23:53:29.322200",
     "models": 1,
     "planos": 14
+  },
+  {
+    "slug": "florentino-hys",
+    "name": "FLORENTINO-HYS",
+    "date": "2026-07-28T00:32:11.736346",
+    "models": 1,
+    "planos": 42
   }
 ]

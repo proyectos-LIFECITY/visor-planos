@@ -1,0 +1,11 @@
+[
+  {
+    "id": "florentino-hys",
+    "name": "FLORENTINO-HYS",
+    "file": "modelos/florentino-hys.ifc",
+    "date": "2026-07-28T00:32:11.736346",
+    "visible": true,
+    "meta": "modelos/florentino-hys.meta.json",
+    "schedules": "modelos/florentino-hys.schedules.json"
+  }
+]
